@@ -17,10 +17,10 @@ namespace Matchfinder.Services
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
 
-            var claims = new List<Claim>();
+            var claims = new List<Claim>
             {
-                Claim claim = new(ClaimTypes.NameIdentifier, user.UserName);
-            }
+                new(ClaimTypes.NameIdentifier, user.UserName)
+            };
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor

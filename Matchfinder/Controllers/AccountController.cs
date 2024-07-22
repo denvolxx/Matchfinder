@@ -37,7 +37,7 @@ namespace Matchfinder.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AppUser>> Login(LoginDTO loginDto)
+        public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDto)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginDto.Username.ToLower());
             if (user == null)
@@ -51,7 +51,13 @@ namespace Matchfinder.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            return Ok($"User {user.UserName} logged in successfully");
+            var userDto = new UserDTO
+            {
+                Username = user.UserName,
+                Token = tokenService.CreateToken(user),
+            };
+
+            return Ok(userDto);
         }
 
         private async Task<bool> UserExists(string username)
