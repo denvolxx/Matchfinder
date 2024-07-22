@@ -2,7 +2,7 @@
 
 namespace Matchfinder.DTO
 {
-    public class RegisterDTO
+    public class LoginDTO
     {
         [MaxLength(16)]
         public required string Username { get; set; }
