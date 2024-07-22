@@ -1,10 +1,13 @@
 using Matchfinder.Data;
+using Matchfinder.Interfaces;
+using Matchfinder.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Services
 builder.Services.AddControllers();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 //Services/Swagger
 builder.Services.AddEndpointsApiExplorer();

@@ -1,6 +1,7 @@
 ﻿using Matchfinder.Data;
 using Matchfinder.DTO;
 using Matchfinder.Entities;
+using Matchfinder.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -8,10 +9,10 @@ using System.Text;
 
 namespace Matchfinder.Controllers
 {
-    public class AccountController(DataContext context) : BaseApiController
+    public class AccountController(DataContext context, ITokenService tokenService) : BaseApiController
     {
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterDTO registerDto)
+        public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDto)
         {
             if (await UserExists(registerDto.Username))
                 return BadRequest("User already exists");
@@ -26,8 +27,13 @@ namespace Matchfinder.Controllers
 
             context.Users.Add(user);
             await context.SaveChangesAsync();
+            var userDto = new UserDTO
+            {
+                Username = user.UserName,
+                Token = tokenService.CreateToken(user)
+            };
 
-            return Ok($"User {user.UserName} was created");
+            return Ok(userDto);
         }
 
         [HttpPost("login")]
