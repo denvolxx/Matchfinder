@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Matchfinder.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UsersController(DataContext context) : ControllerBase
+    public class UsersController(DataContext context) : BaseApiController
     {
 
         [HttpGet("")]
@@ -24,7 +22,7 @@ namespace Matchfinder.Controllers
         public async Task<ActionResult<AppUser>> GetUser(int id)
         {
             var user = await context.Users.FindAsync(id);
-            if (user == null) 
+            if (user == null)
                 return NotFound();
 
             return Ok(user);
