@@ -1,38 +1,15 @@
-using Matchfinder.Data;
-using Matchfinder.Interfaces;
-using Matchfinder.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
+using Matchfinder.Extensions;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Services
-builder.Services.AddControllers();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
-{
-    var tokenKey = builder.Configuration["TokenKey"] ?? throw new Exception("Token key was not found");
-    opt.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-    };
-});
+//Services extensions
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration);
 
 //Services/Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<DataContext>(opt =>
-{
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
-builder.Services.AddCors();
 
 var app = builder.Build();
 
