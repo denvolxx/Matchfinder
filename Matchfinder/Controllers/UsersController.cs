@@ -1,30 +1,28 @@
-﻿using Matchfinder.Data;
-using Matchfinder.Entities;
+﻿using AutoMapper;
+using Matchfinder.DTO;
+using Matchfinder.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Matchfinder.Controllers
 {
     [Authorize]
-    public class UsersController(DataContext context) : BaseApiController
+    public class UsersController(IUserRepository userRepository) : BaseApiController
     {
-        [AllowAnonymous]
         [HttpGet("")]
-        public async Task<ActionResult<IEnumerable<AppUser>>> GetUsersAsync()
+        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsersAsync()
         {
-            var users = await context.Users.ToListAsync();
+            var users = await userRepository.GetMembersAsync();
             if (users == null)
                 return NotFound();
 
             return Ok(users);
         }
 
-        [Authorize]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<AppUser>> GetUser(int id)
+        [HttpGet("{username}")]
+        public async Task<ActionResult<MemberDTO>> GetUser(string username)
         {
-            var user = await context.Users.FindAsync(id);
+            var user = await userRepository.GetMemberAsync(username);
             if (user == null)
                 return NotFound();
 
