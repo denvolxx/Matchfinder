@@ -14,6 +14,8 @@ namespace Matchfinder.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDto)
         {
+            return Ok();
+            /*
             if (await UserExists(registerDto.Username))
                 return BadRequest("User already exists");
 
@@ -32,8 +34,9 @@ namespace Matchfinder.Controllers
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user)
             };
-
+            
             return Ok(userDto);
+            */
         }
 
         [HttpPost("login")]

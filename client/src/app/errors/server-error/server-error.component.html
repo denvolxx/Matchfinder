@@ -1,0 +1,14 @@
+<h1>Internal Server Error</h1>
+
+@if (error) {
+<h5 class="text-danger">Error: {{error.message}}</h5>
+<p class="font-weight-bold">Note: If you are seing this error, then angular is not to blame!</p>
+<p>What to do next?</p>
+
+<code class="mt-5" style="background-color: whitesmoke;">
+    {{error.details}}
+</code>
+}
+
+
+<button class="btn btn-info btn-lg" routerLink="/errors">Errors</button>
