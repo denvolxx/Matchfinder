@@ -1,4 +1,5 @@
 ﻿using Matchfinder.Data;
+using Matchfinder.Helpers;
 using Matchfinder.Interfaces;
 using Matchfinder.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,13 @@ namespace Matchfinder.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
+
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPhotoService, PhotoService>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
 
             services.AddDbContext<DataContext>(opt =>
             {
