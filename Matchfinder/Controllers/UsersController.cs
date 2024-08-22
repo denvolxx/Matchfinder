@@ -36,7 +36,7 @@ namespace Matchfinder.Controllers
         {
             var user = await userRepository.GetUserByNameAsync(User.GetUsername());
             if (user == null)
-                return BadRequest("Could not find user");
+                return NotFound("Could not find user");
 
             mapper.Map(member, user);
 
@@ -56,7 +56,7 @@ namespace Matchfinder.Controllers
         {
             var user = await userRepository.GetUserByNameAsync(User.GetUsername());
             if (user == null)
-                return BadRequest("Could not find user");
+                return NotFound("Could not find user");
 
             var result = await photoService.AddPhotoAsync(file);
             if (result.Error != null)
@@ -85,10 +85,10 @@ namespace Matchfinder.Controllers
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
             var user = await userRepository.GetUserByNameAsync(User.GetUsername());
-            if (user == null) return BadRequest("Could not find user");
+            if (user == null) return NotFound("Could not find user");
 
             var photo = user.Photos.FirstOrDefault(p => p.Id == photoId);
-            if (photo == null) return BadRequest("Could not find photo");
+            if (photo == null) return NotFound("Could not find photo");
             if (photo.IsMain) return BadRequest("This is already a main photo");
 
             var currentMain = user.Photos.FirstOrDefault(p => p.IsMain);
@@ -106,6 +106,36 @@ namespace Matchfinder.Controllers
             else
             {
                 return BadRequest("Main photo was not changed");
+            }
+        }
+
+        [HttpDelete("delete-photo/{photoId:int}")]
+        public async Task<ActionResult> DeletePhoto(int photoId)
+        {
+            var user = await userRepository.GetUserByNameAsync(User.GetUsername());
+            if (user == null) return NotFound("User does not exist or were already deleted");
+
+            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            if (photo == null) return NotFound("Could not find photo ");
+            if (photo.IsMain) return BadRequest("Can not delete main photo");
+
+            //Delete photo from cloud
+            if (photo.PublicId != null)
+            {
+                var result = await photoService.DeletePhotoAsync(photo.PublicId);
+                if (result.Error != null) return BadRequest(result.Error.Message);
+            }
+
+            user.Photos.Remove(photo);
+
+            bool isSaved = await userRepository.SaveAllAsync();
+            if (isSaved)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Problem deleting photo");
             }
         }
     }
