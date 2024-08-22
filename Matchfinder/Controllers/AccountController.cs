@@ -42,7 +42,9 @@ namespace Matchfinder.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDto)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginDto.Username.ToLower());
+            var user = await context.Users
+                .Include(p => p.Photos)
+                .FirstOrDefaultAsync(u => u.UserName.ToLower() == loginDto.Username.ToLower());
             if (user == null)
                 return Unauthorized("Invalid username");
 
@@ -58,6 +60,7 @@ namespace Matchfinder.Controllers
             {
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
             };
 
             return Ok(userDto);
