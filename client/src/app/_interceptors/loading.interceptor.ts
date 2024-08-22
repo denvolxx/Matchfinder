@@ -8,7 +8,10 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   busyService.busy();
 
   return next(req).pipe(
-    //delay(300),
+    //TODO: Remove loader when tested
+    //Delay to test loader and observables (no outgoing requests to API => data stored in observables => loader is not activated)
+    delay(1000), 
+
     finalize(() => {
       busyService.idle();
     })
