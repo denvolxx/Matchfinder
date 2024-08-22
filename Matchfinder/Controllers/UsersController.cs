@@ -40,7 +40,8 @@ namespace Matchfinder.Controllers
 
             mapper.Map(member, user);
 
-            if (await userRepository.SaveAllAsync())
+            bool isSaved = await userRepository.SaveAllAsync();
+            if (isSaved)
             {
                 return NoContent();
             }
@@ -69,7 +70,8 @@ namespace Matchfinder.Controllers
 
             user.Photos.Add(photo);
 
-            if (await userRepository.SaveAllAsync())
+            bool isSaved = await userRepository.SaveAllAsync();
+            if (isSaved)
             {
                 return CreatedAtAction(nameof(GetUser), new { username = user.UserName }, mapper.Map<PhotoDTO>(photo));
             }
@@ -77,8 +79,34 @@ namespace Matchfinder.Controllers
             {
                 return BadRequest("Problem adding photo");
             }
+        }
 
+        [HttpPut("set-main-photo/{photoId:int}")]
+        public async Task<ActionResult> SetMainPhoto(int photoId)
+        {
+            var user = await userRepository.GetUserByNameAsync(User.GetUsername());
+            if (user == null) return BadRequest("Could not find user");
 
+            var photo = user.Photos.FirstOrDefault(p => p.Id == photoId);
+            if (photo == null) return BadRequest("Could not find photo");
+            if (photo.IsMain) return BadRequest("This is already a main photo");
+
+            var currentMain = user.Photos.FirstOrDefault(p => p.IsMain);
+
+            if (currentMain != null)
+                currentMain.IsMain = false;
+
+            photo.IsMain = true;
+
+            bool isSaved = await userRepository.SaveAllAsync();
+            if (isSaved)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest("Main photo was not changed");
+            }
         }
     }
 }
