@@ -15,8 +15,8 @@ namespace Matchfinder.Helpers
             CreateMap<Photo, PhotoDTO>();
             CreateMap<MemberUpdateDTO, AppUser>();
             CreateMap<RegisterDTO, AppUser>();
+            CreateMap<DateTime, DateOnly>().ConvertUsing(item => DateOnly.FromDateTime(DateTime.Now));
             CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s));
-
         }
     }
 }

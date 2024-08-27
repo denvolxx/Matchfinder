@@ -30,8 +30,8 @@ export class RegisterComponent {
 
   initializeForm() {
     this.registerForm = this.fb.group({
-      gender: ['male'],
       username: ['', Validators.required],
+      gender: ['male'],
       knownAs: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
       city: ['', Validators.required],
@@ -51,13 +51,11 @@ export class RegisterComponent {
   }
 
   register() {
-    const dob = this.getDateOnly(this.registerForm.get('dateOfBirth')?.value);
-    console.log(dob)
-    this.registerForm.setValue({ dateOfBirth: dob });
-    console.log(this.registerForm.value);
+    const dob = this.getDateOnly(this.registerForm.get('dateOfBirth')?.value)
+    this.registerForm.patchValue({ dateOfBirth: dob });
     this.accountService.register(this.registerForm.value).subscribe({
       next: _ => this.router.navigateByUrl('/members'),
-      error: error => this.validationErrors = error
+      error: e => this.validationErrors = e
     })
   }
 
