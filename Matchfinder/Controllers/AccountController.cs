@@ -1,4 +1,5 @@
-﻿using Matchfinder.Data;
+﻿using AutoMapper;
+using Matchfinder.Data;
 using Matchfinder.DTO;
 using Matchfinder.Entities;
 using Matchfinder.Interfaces;
@@ -9,34 +10,34 @@ using System.Text;
 
 namespace Matchfinder.Controllers
 {
-    public class AccountController(DataContext context, ITokenService tokenService) : BaseApiController
+    public class AccountController(DataContext context, ITokenService tokenService, IMapper mapper) : BaseApiController
     {
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDto)
         {
-            return Ok();
-            /*
+
             if (await UserExists(registerDto.Username))
                 return BadRequest("User already exists");
 
             using var hmac = new HMACSHA512();
-            var user = new AppUser
-            {
-                UserName = registerDto.Username,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
-            };
+
+            var user = mapper.Map<AppUser>(registerDto);
+
+            user.UserName = registerDto.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSalt = hmac.Key;
 
             context.Users.Add(user);
             await context.SaveChangesAsync();
             var userDto = new UserDTO
             {
                 Username = user.UserName,
-                Token = tokenService.CreateToken(user)
+                Token = tokenService.CreateToken(user),
+                KnownAs = user.KnownAs
             };
-            
+
             return Ok(userDto);
-            */
+
         }
 
         [HttpPost("login")]
