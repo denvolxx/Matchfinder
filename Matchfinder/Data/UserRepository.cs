@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Matchfinder.DTO;
 using Matchfinder.Entities;
+using Matchfinder.Helpers;
 using Matchfinder.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,11 +18,10 @@ namespace Matchfinder.Data
                 .SingleOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<MemberDTO>> GetMembersAsync()
+        public async Task<PagedList<MemberDTO>> GetMembersAsync(UserParams userParams)
         {
-            return await context.Users
-                .ProjectTo<MemberDTO>(mapper.ConfigurationProvider)
-                .ToListAsync();
+            IQueryable<MemberDTO> query = context.Users.ProjectTo<MemberDTO>(mapper.ConfigurationProvider);
+            return await PagedList<MemberDTO>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<AppUser?> GetUserByIdAsync(int id)
