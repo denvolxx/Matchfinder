@@ -15,6 +15,7 @@ namespace Matchfinder.Controllers
         [HttpGet("")]
         public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsersAsync([FromQuery] UserParams userParams)
         {
+            userParams.CurrentUsername = User.GetUsername();
             var users = await userRepository.GetMembersAsync(userParams);
             if (users == null)
                 return NotFound();
