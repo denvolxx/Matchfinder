@@ -30,8 +30,15 @@ namespace Matchfinder.Data
             var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
 
             query = query.Where(x => x.DateOfBirth >= minDob && x.DateOfBirth <= maxDob);
+            query = userParams.OrderBy switch
+            {
+                "created" => query.OrderByDescending(x => x.Created),
+                _ => query.OrderByDescending(x => x.LastActive),
+            };
 
-            return await PagedList<MemberDTO>.CreateAsync(query.ProjectTo<MemberDTO>(mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+            var response = await PagedList<MemberDTO>.CreateAsync(query.ProjectTo<MemberDTO>(mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+
+            return response;
         }
 
         public async Task<AppUser?> GetUserByIdAsync(int id)
