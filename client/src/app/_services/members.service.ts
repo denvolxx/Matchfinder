@@ -1,37 +1,60 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { inject, Injectable, model, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Member } from '../_models/member';
 import { of, tap } from 'rxjs';
 import { Photo } from '../_models/photo';
 import { PaginatedResult } from '../_models/paginations';
 import { UserParams } from '../_models/userParams';
+import { AccountService } from './account.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MembersService {
   private http = inject(HttpClient);
+  private accountService = inject(AccountService);
   baseUrl = environment.apiUrl;
-  //members = signal<Member[]>([]);
   paginatedResult = signal<PaginatedResult<Member[]> | null>(null);
 
+  //used for caching information on members
+  memberCache = new Map();
+
+  //Saving user parameters
+  user = this.accountService.currentUser();
+  userParams = signal<UserParams>(new UserParams(this.user));
+
+resetUserParams() {
+  this.userParams.set(new UserParams(this.user));
+}
+
   //Get members and save them as a signal
-  getMembers(userParams: UserParams) {
-    let params = this.setPaginationHeaders(userParams.pageNumber, userParams.pageSize);
-    params = params.append('minAge', userParams.minAge);
-    params = params.append('maxAge', userParams.maxAge);
-    params = params.append('gender', userParams.gender);
-    params = params.append('orderBy', userParams.orderBy);
+  getMembers() {
+    const cacheResponse = this.memberCache.get(Object.values(this.userParams()).join('-'));
+    if (cacheResponse) return this.setPaginatedResponse(cacheResponse);
+
+    console.log(Object.values(this.userParams()).join('-'));
+
+    let params = this.setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
+
+    params = params.append('minAge', this.userParams().minAge);
+    params = params.append('maxAge', this.userParams().maxAge);
+    params = params.append('gender', this.userParams().gender);
+    params = params.append('orderBy', this.userParams().orderBy);
 
     return this.http.get<Member[]>(this.baseUrl + 'users', { observe: 'response', params }).subscribe({
       next: response => {
-        this.paginatedResult.set({
-          items: response.body as Member[],
-          pagination: JSON.parse(response.headers.get('Pagination')!)
-        })
+        this.setPaginatedResponse(response);
+        this.memberCache.set(Object.values(this.userParams()).join('-'), response)
       }
     });
+  }
+
+  private setPaginatedResponse(response: HttpResponse<Member[]>) {
+    this.paginatedResult.set({
+      items: response.body as Member[],
+      pagination: JSON.parse(response.headers.get('Pagination')!)
+    })
   }
 
   private setPaginationHeaders(pageNumber: number, pageSize: number) {
@@ -44,10 +67,14 @@ export class MembersService {
     return params
   }
 
-  //Get member and save it as Observable
   getMember(username: string) {
-    // const member = this.members().find(x => x.userName === username);
-    // if (member !== undefined) return of(member);
+    // Get members from cache and reduce it to array. Concatinates array with cache from other pages
+    const member: Member = [...this.memberCache.values()]
+      .reduce((arr, elem) => arr.concat(elem.body), [])
+      .find((m: Member) => m.userName === username);
+    console.log(member);
+
+    if (member) return of(member)
 
     return this.http.get<Member>(this.baseUrl + 'users/' + username);
   }
