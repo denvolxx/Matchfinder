@@ -2,6 +2,7 @@
 using Matchfinder.DTO;
 using Matchfinder.Entities;
 using Matchfinder.Extensions;
+using Matchfinder.Helpers;
 using Matchfinder.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +13,19 @@ namespace Matchfinder.Controllers
     public class UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService) : BaseApiController
     {
         [HttpGet("")]
-        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsersAsync()
+        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsersAsync([FromQuery] UserParams userParams)
         {
-            var users = await userRepository.GetMembersAsync();
+            userParams.CurrentUsername = User.GetUsername();
+            var users = await userRepository.GetMembersAsync(userParams);
             if (users == null)
                 return NotFound();
 
+            Response.AddPaginationHeader(users);
             return Ok(users);
         }
 
         [HttpGet("{username}")]
-        public async Task<ActionResult<MemberDTO>> GetUser(string username)
+        public async Task<ActionResult<MemberDTO>> GetUserAsync(string username)
         {
             var user = await userRepository.GetMemberAsync(username);
             if (user == null)
@@ -73,7 +76,7 @@ namespace Matchfinder.Controllers
             bool isSaved = await userRepository.SaveAllAsync();
             if (isSaved)
             {
-                return CreatedAtAction(nameof(GetUser), new { username = user.UserName }, mapper.Map<PhotoDTO>(photo));
+                return CreatedAtAction(nameof(GetUserAsync), new { username = user.UserName }, mapper.Map<PhotoDTO>(photo));
             }
             else
             {

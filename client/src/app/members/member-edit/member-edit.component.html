@@ -13,8 +13,7 @@
 
     <div class="col-4">
         <div class="card">
-            <img src="{{member.photoUrl || 'user.png'}}" alt="{{member.knownAs}}"
-                class="card-img-top img-thumbnail">
+            <img src="{{member.photoUrl || 'user.png'}}" alt="{{member.knownAs}}" class="card-img-top img-thumbnail">
             <div class="card-body">
                 <div>
                     <strong>Location:</strong>
@@ -25,12 +24,12 @@
                     <p>{{member.age}}</p>
                 </div>
                 <div>
-                    <strong>Last Active:</strong>
-                    <p>{{member.lastActive}}</p>
+                    <strong>Last Active</strong>
+                    <p>{{member.lastActive | timeago}}</p>
                 </div>
                 <div>
                     <strong>Member since:</strong>
-                    <p>{{member.created}}</p>
+                    <p>{{member.created | date: 'dd MMM yyyy'}}</p>
                 </div>
             </div>
             <div class="card-footer">
