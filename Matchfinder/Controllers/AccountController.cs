@@ -33,7 +33,8 @@ namespace Matchfinder.Controllers
             {
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
-                KnownAs = user.KnownAs
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
             };
 
             return Ok(userDto);
@@ -61,7 +62,8 @@ namespace Matchfinder.Controllers
             {
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
+                Gender = user.Gender
             };
 
             return Ok(userDto);

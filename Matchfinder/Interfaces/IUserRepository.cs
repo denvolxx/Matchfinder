@@ -1,5 +1,6 @@
 ﻿using Matchfinder.DTO;
 using Matchfinder.Entities;
+using Matchfinder.Helpers;
 
 namespace Matchfinder.Interfaces
 {
@@ -10,8 +11,7 @@ namespace Matchfinder.Interfaces
         Task<IEnumerable<AppUser>> GetUsersAsync();
         Task<AppUser?> GetUserByIdAsync(int id);
         Task<AppUser?> GetUserByNameAsync(string username);
-
-        Task<IEnumerable<MemberDTO>> GetMembersAsync();
+        Task<PagedList<MemberDTO>> GetMembersAsync(UserParams userParams);
         Task<MemberDTO?> GetMemberAsync(string username);
     }
 }
